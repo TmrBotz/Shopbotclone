@@ -79,12 +79,7 @@ def start(cid):
     TASKS[cid] = asyncio.create_task(_supervise(cid))
 
 
-async def stop(cid):
-    t = TASKS.pop(cid, None)
-    if t:
-        t.cancel()
-        await asyncio.gather(t, return_exceptions=True)
-    p = PROCS.pop(cid, None)
+async def _kill(p):
     if p and p.returncode is None:
         p.terminate()
         try:
@@ -92,6 +87,16 @@ async def stop(cid):
         except asyncio.TimeoutError:
             p.kill()
             await p.wait()
+
+
+async def stop(cid):
+    p = PROCS.get(cid)  # task cancel hone se pehle pakdo (finally me PROCS se hat jata hai)
+    t = TASKS.pop(cid, None)
+    if t:
+        t.cancel()
+        await asyncio.gather(t, return_exceptions=True)
+    PROCS.pop(cid, None)
+    await _kill(p)
 
 
 async def restart(cid):
