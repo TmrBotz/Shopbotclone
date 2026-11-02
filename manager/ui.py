@@ -17,7 +17,7 @@ def kb(*rows):
 
 async def edit(q, text, markup=None):
     try:
-        await q.message.edit_text(text, reply_markup=markup, disable_web_page_preview=True)
+        await q.message.edit_text(text, reply_markup=markup)
     except MessageNotModified:
         pass
 
